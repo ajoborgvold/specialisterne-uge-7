@@ -10,7 +10,10 @@ class Product:
         self.stock = stock
     
     def __str__(self):
-        return f"Id: {self.product_id}\n Name: {self.name}\n Description: {self.description}\n Category: {self.category}\n Price: {self.price}\n Stock: {self.stock}"
+        return f"\nId: {self.product_id}\nName: {self.name}\nDescription: {self.description}\nCategory: {self.category}\nPrice: {self.price}\nStock: {self.stock}\nOn sale: No"
+    
+    def show_price(self):
+        return self.price
     
     def show_stock(self):
         return self.stock
@@ -18,96 +21,167 @@ class Product:
     def update_stock(self, stock_change):
         self.stock += stock_change
 
-class Catalogue:
-    def __init__(self):
-        self.products = []
-        self.next_product_id = 1
+class ProductOnSale(Product):
+    def __init__(self, product_id, name, description, category, price, stock, discount):
+        super().__init__(product_id, name, description, category, price, stock)
+        self.discount = discount
+        
+    def __str__(self):
+        return f"\nId: {self.product_id}\nName: {self.name}\nDescription: {self.description}\nCategory: {self.category}\nPrice: {self.price}\nStock: {self.stock}\nOn sale: Yes"
+    
+    def show_price(self):
+        discounted_price = round(self.price - (self.price * self.discount / 100), 2)
+        return discounted_price
 
-    def generate_unique_id(self):
+class Factory:
+    def __init__(self, catalogue):
+        self.catalogue = catalogue
+        self.next_product_id = 1
+    
+    def _generate_unique_id(self):
         product_id = self.next_product_id
         self.next_product_id += 1
         return product_id
     
     def generate_fake_product(self, row):
-        product_id = self.generate_unique_id()
+        product_id = self._generate_unique_id()
         price = float(row["Price"])
         stock = int(row["Stock"])
-        self.add_product(Product(product_id, row["Name"], row["Description"], row["Category"], price, stock))
+        self.catalogue.add_product(Product(product_id, row["Name"], row["Description"], row["Category"], price, stock))
+    
+    def create_new_product(self, name, description, category, price, stock, **kwargs):
+        product_id = self._generate_unique_id()
+        if "discount" in kwargs and isinstance(kwargs["discount"], (int, float)) and 0 < kwargs["discount"] < 100:
+            discount = kwargs["discount"]
+            self.catalogue.add_product(ProductOnSale(product_id, name, description, category, price, stock, discount))
+        else:
+            self.catalogue.add_product(Product(product_id, name, description, category, price, stock))
 
-    def create_new_product(self, name, description, category, price, stock):
-        product_id = self.generate_unique_id()
-        self.add_product(Product(product_id, name, description, category, price, stock))
+class Catalogue:
+    def __init__(self):
+        self.products = []
     
-    def add_product(self, product):
-        self.products.append(product)
+    def add_product(self, new_product):
+        for product in self.products:
+            if product.name.lower() == new_product.name.lower() or product.description.lower() == new_product.description.lower():
+                print(f"A product with the name {new_product.name} or the description {new_product.description} already exists in the catalogue.")
+                return
+        self.products.append(new_product)
     
-    def search_product_by_id(self, product_id):
-        try:
-            product_id = int(product_id)
-        except ValueError:
-            return f"Invalid product ID: {product_id}. Please provide a valid integer ID."
-        
+    def delete_product(self, product_id):
         for product in self.products:
             if product.product_id == product_id:
+                self.products.remove(product)
+                print(f"The product with the name {product.name} and the id {product_id} was successfully removed.")
+                return True
+        return False
+    
+    def get_unique_categories(self):
+        unique_categories = {product.category for product in self.products}
+        return [{"id": index, "category": category} for index, category in enumerate(unique_categories, start=1)]
+    
+    def search_product(self, query_type, query_value):
+        validation_error = self._validate_query(query_type, query_value)
+        if validation_error:
+            return validation_error
+        
+        if query_type == "id":
+            return self._search_product_by_id(query_value)
+        elif query_type == "name":
+            return self._search_product_by_name(query_value)
+        elif query_type == "category":
+            return self._search_product_by_category(query_value)
+        elif query_type == "discount":
+            return self._search_product_by_discount(query_value)
+        else:
+            return f"Invalid query type: {query_type}. Please provide a valid query type (id, name or category)."
+    
+    def _validate_query(self, query_type, query_value):
+        if query_type == "id":
+            try:
+                int(query_value)
+            except ValueError:
+                return f"Invalid product {query_type}: {query_value}. Please provide a valid integer ID."
+        elif query_type == "name" and not isinstance(query_value, str):
+            return f"Invalid product {query_type}: {query_value}. Please provide a valid string."
+        elif query_type == "category" and not isinstance(query_value, str):
+            return f"Invalid product {query_type}: {query_value}. Please provide a valid string."
+        elif query_type == "discount" and not isinstance(query_value, bool):
+            return f"Invalid discount query: {query_value}. Please provide a valid boolean (True or False)."
+        else:
+            return None
+    
+    def _search_product_by_id(self, product_id):
+        for product in self.products:
+            if product.product_id == int(product_id):
                 return product
                 
         return f"No product with the id {product_id} in the catalogue."
     
-    def search_product_by_name(self, name):
-        if not isinstance(name, str):
-            return f"Invalid product name: {name}. Please provide a valid string."
-        
+    def _search_product_by_name(self, name):
         for product in self.products:
             if product.name.lower() == name.lower():
                 return product
                 
         return f"No product with the name {name} in the catalogue."
     
-    def search_product_by_category(self, category):
-        if not isinstance(category, str):
-            return f"Invalid product category: {category}. Please provide a valid string."
+    def _search_product_by_category(self, category):
+        matching_products = [str(product) for product in self.products if product.category.lower() == category.lower()]
         
-        product_list = []
-        
-        for product in self.products:
-            if product.category.lower() == category.lower():
-                product_list.append(str(product))
-            else:
-                continue
-        
-        if product_list:
-            return "\n".join(product_list)
+        if matching_products:
+            return "\n".join(matching_products)
         else:
             return f"No products in the category: {category}"
     
-    def delete_product(self, product_id):
+    def _search_product_by_discount(self, has_discount):
+        if has_discount:
+            discounted_products = [str(product) for product in self.products if isinstance(product, ProductOnSale)]
+        else:
+            discounted_products = [str(product) for product in self.products if not isinstance(product, ProductOnSale)]
+        
+        if discounted_products:
+            return "\n".join(discounted_products)
+        else:
+            if has_discount:
+                return "No discounted products found."
+            else:
+                return "No products without discount found."
+    
+    def show_total_stock(self):
+        stock_list = []
+        
         for product in self.products:
-            if product.product_id == product_id:
-                self.products.remove(product)
-                return True
-        return False
+            product_stock = {product.name: product.stock}
+            stock_list.append(product_stock)
+        
+        return f"Unique products in the catalogue: {len(self.products)}.\nStock for each unique product:\n{stock_list}"
 
 catalogue = Catalogue()
+factory = Factory(catalogue)
 
-with open("fake_products.csv") as file:
-    reader = csv.DictReader(file)
-    for row in reader:
-        catalogue.generate_fake_product(row)
+def generate_products_from_csv(filepath):
+    with open(filepath) as file:
+        reader = csv.DictReader(file)
+        for row in reader:
+            factory.generate_fake_product(row)
+
+generate_products_from_csv("fake_products.csv")
+
+all_categories = catalogue.get_unique_categories()
+# print(all_categories)
 
 
+factory.create_new_product("Speaker", "High-quality audio speaker", "Electronics", 99.99, 50, discount=10)
+# print(product_on_sale.get_discounted_price())
 
-
-# catalogue.create_new_product("Speaker", "High-quality audio speaker", "Electronics", 99.99, 50)
-
-# for product in catalogue.products:
-#     print(product)
-
-# print(catalogue.search_product_by_name(True))
-# print(catalogue.search_product_by_id(1))
-# print(catalogue.search_product_by_category("electronics"))
+# search_result = catalogue.search_product("discount", True)
+# print(search_result)
 
 
 # catalogue.delete_product(8)
 
-# for product in catalogue.products:
-#     print(product)
+for product in catalogue.products:
+    print(product)
+    print("Price", product.show_price())
+
+# print(catalogue.show_total_stock())
