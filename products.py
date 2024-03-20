@@ -224,15 +224,12 @@ def add_new_product():
                 continue
             
         elif option_selection == "2":            
-            valid_category = False
-            valid_medium = False
-            
-            
             print("Enter new data to add a book to the catalogue.")
             title = input("Enter the book's title:\n").strip()
             author = input("Enter the author(s):\n").strip()
             description = input("Enter a description of the book:\n").strip()
             
+            valid_category = False
             while not valid_category:
                 category = input("Select a category: f for fiction and n for non-fiction:\n").strip().lower()
                 if category in ["f", "n"]:
@@ -241,6 +238,7 @@ def add_new_product():
                 else:
                     print("Invalid selection. Please try again.")
                 
+            valid_medium = False
             while not valid_medium:
                 medium = input("Select a medium: p for printed, a for audio and e for e-book:\n").strip().lower()
                 if medium in ["p", "a", "e"]:
@@ -250,10 +248,36 @@ def add_new_product():
                     print("Invalid selection. Please try again.\n")
                 
             audience = input("Enter the target audience, e.g. children, young adults or adults:\n").strip()
-            size = input("Enter the size, e.g. number of pages (printed books), length in minutes (audiobooks) or byte size in KB (e-books):\n").strip()
-            price = round(float(input("Enter the price:\n").strip()), 2)
-            stock = int(input("Enter the current stock, i.e. how many copies you're adding:\n").strip())
             
+            valid_size = False
+            while not valid_size:
+                size = input("Enter the size, e.g. number of pages (printed books), length in minutes (audiobooks) or byte size in KB (e-books):\n").strip()
+                try:
+                    size = int(size)
+                    valid_size = True
+                    continue
+                except ValueError:
+                    print("Invalid input. Please enter a valid integer value.")
+            
+            valid_price = False
+            while not valid_price:
+                price = input("Enter the price:\n").strip()
+                try:
+                    price = round(float(price), 2)
+                    valid_price = True
+                    continue
+                except ValueError:
+                    print("Invalid input. Please enter a valid float or integer value.")
+            
+            valid_stock = False
+            while not valid_stock:
+                stock = input("Enter the current stock, i.e. how many copies you're adding:\n").strip()
+                try:
+                    stock = int(stock)
+                    valid_stock = True
+                    continue
+                except ValueError:
+                    print("Invalid input. Please enter a valid integer value")
             
             args = {
                 "title": title,
