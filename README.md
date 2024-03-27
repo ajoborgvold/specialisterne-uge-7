@@ -2,7 +2,8 @@
 
 ## Lagerkoncept
 
-Jeg har skabt en fiktiv boghandel, og de varer, som går ind på og ud fra lageret, er altså bøger. Bøgerne findes i tre forskellige medier: trykte bøger, lydbøger og e-bøger. Jeg valgte dette koncept for at give mig selv mulighed for at opsætte nogle rammer for mit lagerstyringssystem og dermed skabe en fleksible og dynamisk omend lukket kodestruktur.
+Jeg har skabt en fiktiv boghandel, og de varer, som går ind på og ud fra lageret, er altså bøger. Bøgerne findes i tre forskellige medier: trykte bøger, lydbøger og e-bøger. Jeg valgte dette koncept for at give mig selv mulighed for at opsætte nogle rammer for mit lagerstyringssystem og dermed skabe en fleksible og dynamisk omend lukket kodestruktur.  
+For enkelthedens skyld har jeg valgt at arbejde med et `stock` attribut for alle tre medier. Det er nok ikke helt realistisk, at alle lyd- og e-bøger indkøbes på begrænsede licenser og derfor har et `stock` attribut, men det har jeg altså valgt at se bort fra.
 
 ## Kodestruktur
 
