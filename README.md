@@ -30,7 +30,7 @@ Her behandles indkommen data om nye bøger, som skal tilføjes til lageret. Klas
 Her kan bøger tilføjes hhv. slettes fra lageret. Klassen har ansvar for alle søgefunktioner. Bøger kan søges frem fra kataloget vha. bogens id, forfatter, titel, kategori (fiction/non-fiction) og medie (printed/audio/e-book). Desuden rummer klassen en metode, som genererer sortede lister over alle bøger på lageret. Listen kan sorteres efter forfatter, titel, kategori, medie og lagerbeholdning (i opad- eller nedadgående orden).
 
 ## Interaktion med lagersystemet
-Lagersystemet kan som beskrevet tilgås og afprøves via menuen i filen `main.py`. Kernen i menuen er funktionen `main`, som styrer selve hovedmenuen. Herfra kan brugeren vælge fire forskellige undermenuer: 'Add a new book', 'Search for a book', 'Delete a book` og `Get reports on the bookstore's stock'. Hver undermenu styres af sin egen funktion, og når en undermenu forlades og afsluttes, bliver brugeren sendt tilbage til hovedmenuen. Nedenfor følger en mere detaljeret beskrivelse af de forskellige undermenuer.
+Lagersystemet kan som beskrevet tilgås og afprøves via menuen i filen `main.py`. Kernen i menuen er funktionen `main`, som styrer selve hovedmenuen. Herfra kan brugeren vælge fire forskellige undermenuer: 'Add a new book', 'Search for a book', 'Delete a book' og 'Get reports on the bookstore's stock'. Hver undermenu styres af sin egen funktion, og når en undermenu forlades og afsluttes, bliver brugeren sendt tilbage til hovedmenuen. Nedenfor følger en mere detaljeret beskrivelse af de forskellige undermenuer.
 
 ### Menuen 'Add a new book'
 Denne menu rummer to forskellige funktioner:
